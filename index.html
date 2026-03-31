@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <title>Neon Vault</title>
+    <meta
+      name="description"
+      content="A modern playable ad puzzle where players rotate circuit tiles to unlock the Neon Vault."
+    />
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <div class="app-shell">
+      <div class="ambient ambient-a"></div>
+      <div class="ambient ambient-b"></div>
+
+      <main class="game-frame">
+        <section class="hero-bar">
+          <div>
+            <p class="eyebrow">Playable Ad Demo</p>
+            <h1>Charge the Neon Vault</h1>
+            <p class="subtitle">Rotate the glowing tiles and complete the circuit before the charge fades.</p>
+          </div>
+          <button class="cta-button cta-button-top" id="top-cta" type="button">Install Now</button>
+        </section>
+
+        <section class="hud" aria-label="Game status">
+          <div class="hud-card">
+            <span class="hud-label">Goal</span>
+            <strong id="goal-text">Connect source to vault</strong>
+          </div>
+          <div class="hud-card">
+            <span class="hud-label">Moves</span>
+            <strong id="moves-count">0</strong>
+          </div>
+          <div class="hud-card">
+            <span class="hud-label">Charge</span>
+            <strong id="charge-count">100%</strong>
+          </div>
+        </section>
+
+        <section class="stage">
+          <div class="board-panel">
+            <div class="tutorial-callout" id="tutorial-callout">
+              Tap the glowing tile to rotate it
+            </div>
+            <div class="board-header">
+              <div class="legend">
+                <span class="legend-dot source"></span>
+                Source
+              </div>
+              <div class="legend">
+                <span class="legend-dot vault"></span>
+                Vault
+              </div>
+            </div>
+            <div class="board" id="board" aria-label="Puzzle board"></div>
+          </div>
+
+          <aside class="side-panel">
+            <div class="promo-card">
+              <p class="promo-kicker">Puzzle + progression</p>
+              <h2>Feel the one-move win</h2>
+              <p id="status-text">
+                Rotate the highlighted tile to watch the whole board light up.
+              </p>
+            </div>
+
+            <div class="feature-list">
+              <div class="feature-pill">Fast touch gameplay</div>
+              <div class="feature-pill">Bold neon feedback</div>
+              <div class="feature-pill">Ad-ready single page</div>
+            </div>
+
+            <button class="cta-button cta-button-main" id="main-cta" type="button">Play Full Game</button>
+          </aside>
+        </section>
+      </main>
+
+      <div class="overlay hidden" id="overlay" aria-live="polite">
+        <div class="overlay-card">
+          <p class="overlay-label">Vault Unlocked</p>
+          <h2>That felt satisfying.</h2>
+          <p id="overlay-message">Players love quick puzzle wins like this.</p>
+          <button class="cta-button cta-button-main" id="overlay-cta" type="button">Install Now</button>
+          <button class="secondary-button" id="replay-button" type="button">Replay</button>
+        </div>
+      </div>
+    </div>
+
+    <script src="./script.js"></script>
+  </body>
+</html>
