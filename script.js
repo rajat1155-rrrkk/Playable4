@@ -74,6 +74,11 @@ const tutorialTarget = { row: 0, col: 2 };
 let state;
 let cellMap;
 
+function syncViewportHeight() {
+  const viewportHeight = window.innerHeight * 0.01;
+  document.documentElement.style.setProperty("--vh", `${viewportHeight}px`);
+}
+
 function createGameState() {
   const board = baseTiles.map((row, rowIndex) =>
     row.map((tile, colIndex) => ({
@@ -287,6 +292,9 @@ for (const button of ctaButtons) {
     window.open(adTargetUrl, "_blank", "noopener,noreferrer");
   });
 }
+
+syncViewportHeight();
+window.addEventListener("resize", syncViewportHeight);
 
 state = createGameState();
 buildBoard();
