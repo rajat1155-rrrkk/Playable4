@@ -106,6 +106,7 @@ function getOpenSides(tile) {
 
 function renderBoard() {
   boardElement.innerHTML = "";
+  const fragment = document.createDocumentFragment();
 
   state.board.forEach((row) => {
     row.forEach((tile) => {
@@ -149,10 +150,11 @@ function renderBoard() {
       }
 
       cell.append(path, core);
-      cell.addEventListener("click", () => rotateTile(tile.row, tile.col));
-      boardElement.appendChild(cell);
+      fragment.appendChild(cell);
     });
   });
+
+  boardElement.appendChild(fragment);
 }
 
 function rotateTile(row, col) {
@@ -259,6 +261,15 @@ function resetGame() {
 }
 
 replayButton.addEventListener("click", resetGame);
+
+boardElement.addEventListener("click", (event) => {
+  const cell = event.target.closest(".cell");
+  if (!cell || state.solved) {
+    return;
+  }
+
+  rotateTile(Number(cell.dataset.row), Number(cell.dataset.col));
+});
 
 ctaButtons.forEach((button) => {
   button.addEventListener("click", () => {
