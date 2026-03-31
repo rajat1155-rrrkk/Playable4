@@ -191,6 +191,7 @@ h2 {
   background: rgba(255, 255, 255, 0.05);
   font-size: 0.82rem;
   color: var(--muted);
+  font-weight: 700;
 }
 
 .legend-dot {
@@ -259,6 +260,63 @@ h2 {
 .cell-path {
   position: absolute;
   inset: 12%;
+}
+
+.cell-label {
+  position: absolute;
+  left: 8px;
+  top: 8px;
+  z-index: 2;
+  padding: 3px 6px;
+  border-radius: 999px;
+  font-size: 0.58rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #07111e;
+}
+
+.cell-label.source {
+  background: var(--cyan);
+}
+
+.cell-label.vault {
+  background: var(--pink);
+  color: #fff3fb;
+}
+
+.direction-hint {
+  position: absolute;
+  z-index: 2;
+  width: 18px;
+  height: 18px;
+  display: grid;
+  place-items: center;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.06);
+  color: rgba(238, 247, 255, 0.78);
+  font-size: 0.62rem;
+  line-height: 1;
+}
+
+.direction-hint.up {
+  top: 6px;
+  left: calc(50% - 9px);
+}
+
+.direction-hint.right {
+  right: 6px;
+  top: calc(50% - 9px);
+}
+
+.direction-hint.down {
+  bottom: 6px;
+  left: calc(50% - 9px);
+}
+
+.direction-hint.left {
+  left: 6px;
+  top: calc(50% - 9px);
 }
 
 .segment {
@@ -379,7 +437,7 @@ h2 {
   top: 50px;
   left: 16px;
   z-index: 3;
-  max-width: 190px;
+  max-width: 240px;
   padding: 8px 10px;
   border-radius: 14px;
   background: rgba(255, 209, 102, 0.14);

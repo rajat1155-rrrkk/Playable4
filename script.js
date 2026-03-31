@@ -140,6 +140,16 @@ function renderBoard() {
 
       path.append(horizontal, vertical);
 
+      openSides.forEach((side) => {
+        const hint = document.createElement("div");
+        hint.className = `direction-hint ${side}`;
+        hint.textContent =
+          side === "up" ? "↑" :
+          side === "right" ? "→" :
+          side === "down" ? "↓" : "←";
+        cell.appendChild(hint);
+      });
+
       const core = document.createElement("div");
       core.className = "core";
       if (tile.type === "source") {
@@ -147,6 +157,13 @@ function renderBoard() {
       }
       if (tile.type === "vault") {
         core.classList.add("vault");
+      }
+
+      if (tile.type === "source" || tile.type === "vault") {
+        const label = document.createElement("div");
+        label.className = `cell-label ${tile.type}`;
+        label.textContent = tile.type === "source" ? "Start" : "End";
+        cell.appendChild(label);
       }
 
       cell.append(path, core);
@@ -170,7 +187,7 @@ function rotateTile(row, col) {
   if (row === tutorialTarget.row && col === tutorialTarget.col) {
     state.tutorialDone = true;
     tutorialCallout.classList.add("hidden");
-    statusElement.textContent = "Nice. Keep going and watch the circuit react in real time.";
+    statusElement.textContent = "Nice. The route now runs from START to END.";
   }
 
   updateConnectivity();
@@ -233,7 +250,7 @@ function updateConnectivity() {
   } else if (!solved) {
     const energizedCount = state.board.flat().filter((tile) => tile.energized).length;
     if (!state.tutorialDone) {
-      statusElement.textContent = "Rotate the highlighted tile to watch the whole board light up.";
+      statusElement.textContent = "Turn the gold tile so the path connects START to END.";
     } else {
       statusElement.textContent = `${energizedCount} tile${energizedCount === 1 ? "" : "s"} charged. Guide the flow into the vault.`;
     }
@@ -254,7 +271,7 @@ function resetGame() {
   overlay.classList.add("hidden");
   tutorialCallout.classList.remove("hidden");
   goalElement.textContent = "Connect source to vault";
-  statusElement.textContent = "Rotate the highlighted tile to watch the whole board light up.";
+  statusElement.textContent = "Turn the gold tile so the path connects START to END.";
   updateConnectivity();
   updateHud();
   renderBoard();
