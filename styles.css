@@ -20,7 +20,6 @@
 html,
 body {
   margin: 0;
-  width: 100%;
   min-height: 100%;
   font-family: "Avenir Next", "Trebuchet MS", "Segoe UI", sans-serif;
   background:
@@ -30,7 +29,6 @@ body {
 }
 
 body {
-  min-height: 100vh;
   overscroll-behavior: none;
 }
 
@@ -39,19 +37,16 @@ button {
 }
 
 .ad-shell {
-  width: 100%;
   min-height: 100vh;
-  min-height: calc(var(--vh, 1vh) * 100);
+  min-height: 100dvh;
   display: grid;
   place-items: center;
   padding: max(8px, env(safe-area-inset-top)) 8px max(8px, env(safe-area-inset-bottom));
 }
 
 .ad-frame {
-  width: 100%;
-  max-width: 430px;
-  height: min(calc(var(--vh, 1vh) * 100 - 16px), 760px);
-  min-height: 620px;
+  width: min(100vw - 16px, calc((100dvh - 16px) * 9 / 16), 430px);
+  min-height: min(calc(100dvh - 16px), 760px);
   aspect-ratio: 9 / 16;
   display: grid;
   grid-template-rows: auto auto 1fr auto;
@@ -170,7 +165,6 @@ h2 {
 .board {
   width: 100%;
   max-width: 330px;
-  height: min(330px, calc(100vw - 72px));
   aspect-ratio: 1;
   display: grid;
   grid-template-columns: repeat(5, minmax(0, 1fr));
@@ -333,7 +327,8 @@ h2 {
 
 @media (max-width: 420px) {
   .ad-frame {
-    min-height: calc(var(--vh, 1vh) * 100 - 12px);
+    width: calc(100vw - 12px);
+    min-height: calc(100dvh - 12px);
     border-radius: 22px;
     padding: 12px;
   }
