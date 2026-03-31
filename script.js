@@ -15,6 +15,13 @@ const ctaButtons = [
 ].filter(Boolean);
 
 const adTargetUrl = "https://play.google.com/store";
+const directionOrder = ["up", "right", "down", "left"];
+const directionVectors = {
+  up: { row: -1, col: 0, opposite: "down" },
+  right: { row: 0, col: 1, opposite: "left" },
+  down: { row: 1, col: 0, opposite: "up" },
+  left: { row: 0, col: -1, opposite: "right" },
+};
 
 const baseTiles = [
   [
@@ -29,21 +36,21 @@ const baseTiles = [
     { type: "straight", open: ["left", "right"] },
     { type: "straight", open: ["up", "down"] },
     { type: "corner", open: ["left", "up"] },
-    { type: "straight", open: ["up", "down"] },
+    { type: "straight", open: ["left", "right"] },
   ],
   [
     { type: "corner", open: ["up", "right"] },
     { type: "corner", open: ["left", "down"] },
-    { type: "corner", open: ["up", "right"] },
-    { type: "straight", open: ["left", "right"] },
+    { type: "straight", open: ["up", "down"] },
+    { type: "corner", open: ["right", "down"] },
     { type: "corner", open: ["left", "down"] },
   ],
   [
     { type: "corner", open: ["right", "down"] },
     { type: "straight", open: ["left", "right"] },
-    { type: "corner", open: ["left", "up"] },
-    { type: "corner", open: ["right", "down"] },
-    { type: "straight", open: ["up", "down"] },
+    { type: "corner", open: ["up", "right"] },
+    { type: "straight", open: ["left", "right"] },
+    { type: "corner", open: ["left", "down"] },
   ],
   [
     { type: "corner", open: ["up", "right"] },
@@ -55,7 +62,7 @@ const baseTiles = [
 ];
 
 const scrambleRotations = [
-  [0, 0, 1, 0, 0],
+  [0, 0, 3, 0, 0],
   [0, 0, 0, 0, 0],
   [0, 0, 0, 0, 0],
   [0, 0, 0, 0, 0],
@@ -63,15 +70,9 @@ const scrambleRotations = [
 ];
 
 const tutorialTarget = { row: 0, col: 2 };
-const directionOrder = ["up", "right", "down", "left"];
-const directionVectors = {
-  up: { row: -1, col: 0, opposite: "down" },
-  right: { row: 0, col: 1, opposite: "left" },
-  down: { row: 1, col: 0, opposite: "up" },
-  left: { row: 0, col: -1, opposite: "right" },
-};
 
-let state = createGameState();
+let state;
+let cellMap;
 
 function createGameState() {
   const board = baseTiles.map((row, rowIndex) =>
@@ -104,55 +105,70 @@ function getOpenSides(tile) {
   return rotateDirections(tile.open, tile.rotation);
 }
 
-function renderBoard() {
+function buildBoard() {
   boardElement.innerHTML = "";
+  cellMap = new Map();
 
-  state.board.forEach((row) => {
-    row.forEach((tile) => {
+  for (const row of state.board) {
+    for (const tile of row) {
       const cell = document.createElement("button");
       cell.type = "button";
       cell.className = "cell";
-      cell.setAttribute("aria-label", `${tile.type} tile`);
       cell.dataset.row = String(tile.row);
       cell.dataset.col = String(tile.col);
-
-      if (
-        !state.tutorialDone &&
-        tile.row === tutorialTarget.row &&
-        tile.col === tutorialTarget.col
-      ) {
-        cell.classList.add("highlight");
-      }
-
-      if (tile.energized) {
-        cell.classList.add("completed");
-      }
+      cell.setAttribute("aria-label", `${tile.type} tile`);
 
       const path = document.createElement("div");
       path.className = "cell-path";
 
-      const openSides = getOpenSides(tile);
       const horizontal = document.createElement("div");
-      horizontal.className = `segment horizontal ${openSides.includes("left") || openSides.includes("right") ? "active" : "inactive"}`;
-      const vertical = document.createElement("div");
-      vertical.className = `segment vertical ${openSides.includes("up") || openSides.includes("down") ? "active" : "inactive"}`;
+      horizontal.className = "segment horizontal";
 
-      path.append(horizontal, vertical);
+      const vertical = document.createElement("div");
+      vertical.className = "segment vertical";
 
       const core = document.createElement("div");
       core.className = "core";
+
       if (tile.type === "source") {
         core.classList.add("source");
       }
+
       if (tile.type === "vault") {
         core.classList.add("vault");
       }
 
+      path.append(horizontal, vertical);
       cell.append(path, core);
-      cell.addEventListener("click", () => rotateTile(tile.row, tile.col));
       boardElement.appendChild(cell);
-    });
-  });
+
+      cellMap.set(keyFor(tile.row, tile.col), {
+        cell,
+        horizontal,
+        vertical,
+      });
+    }
+  }
+}
+
+function paintBoard() {
+  for (const row of state.board) {
+    for (const tile of row) {
+      const cellEntry = cellMap.get(keyFor(tile.row, tile.col));
+      const openSides = getOpenSides(tile);
+      const hasHorizontal = openSides.includes("left") || openSides.includes("right");
+      const hasVertical = openSides.includes("up") || openSides.includes("down");
+      const isTutorialTarget =
+        !state.tutorialDone &&
+        tile.row === tutorialTarget.row &&
+        tile.col === tutorialTarget.col;
+
+      cellEntry.cell.classList.toggle("highlight", isTutorialTarget);
+      cellEntry.cell.classList.toggle("energized", tile.energized);
+      cellEntry.horizontal.className = `segment horizontal ${hasHorizontal ? "on" : "off"}`;
+      cellEntry.vertical.className = `segment vertical ${hasVertical ? "on" : "off"}`;
+    }
+  }
 }
 
 function rotateTile(row, col) {
@@ -163,77 +179,74 @@ function rotateTile(row, col) {
   const tile = state.board[row][col];
   tile.rotation = (tile.rotation + 1) % 4;
   state.moves += 1;
-  state.charge = Math.max(12, 100 - state.moves * 6);
+  state.charge = Math.max(18, 100 - state.moves * 8);
 
   if (row === tutorialTarget.row && col === tutorialTarget.col) {
     state.tutorialDone = true;
     tutorialCallout.classList.add("hidden");
-    statusElement.textContent = "Nice. Keep going and watch the circuit react in real time.";
   }
 
   updateConnectivity();
   updateHud();
-  renderBoard();
+  paintBoard();
 }
 
 function updateConnectivity() {
   const visited = new Set();
-  const queue = [];
-  const source = state.board[0][0];
+  const queue = [state.board[0][0]];
+  visited.add(keyFor(0, 0));
 
-  queue.push(source);
-  visited.add(keyFor(source.row, source.col));
-
-  state.board.flat().forEach((tile) => {
+  for (const tile of state.board.flat()) {
     tile.energized = false;
-  });
+  }
 
   while (queue.length > 0) {
     const tile = queue.shift();
     tile.energized = true;
-    const openSides = getOpenSides(tile);
 
-    openSides.forEach((side) => {
+    for (const side of getOpenSides(tile)) {
       const vector = directionVectors[side];
       const nextRow = tile.row + vector.row;
       const nextCol = tile.col + vector.col;
       const nextTile = state.board[nextRow]?.[nextCol];
 
       if (!nextTile) {
-        return;
+        continue;
       }
 
-      const nextOpenSides = getOpenSides(nextTile);
-      if (!nextOpenSides.includes(vector.opposite)) {
-        return;
+      if (!getOpenSides(nextTile).includes(vector.opposite)) {
+        continue;
       }
 
       const key = keyFor(nextRow, nextCol);
       if (visited.has(key)) {
-        return;
+        continue;
       }
 
       visited.add(key);
       queue.push(nextTile);
-    });
+    }
   }
 
-  const vaultTile = state.board[4][4];
-  const solved = vaultTile.energized;
+  const solved = state.board[4][4].energized;
 
   if (solved && !state.solved) {
     state.solved = true;
     state.charge = 100;
-    goalElement.textContent = "Vault charged";
-    statusElement.textContent = "Perfect route. The vault is fully online and the reward animation is ready.";
-    overlayMessage.textContent = `Solved in ${state.moves} move${state.moves === 1 ? "" : "s"}. This is the kind of instant payoff that converts well in a playable.`;
-    window.setTimeout(() => overlay.classList.remove("hidden"), 700);
-  } else if (!solved) {
-    const energizedCount = state.board.flat().filter((tile) => tile.energized).length;
+    goalElement.textContent = "Vault open";
+    statusElement.textContent = "Perfect. The route is active and the vault is unlocked.";
+    overlayMessage.textContent = `Solved in ${state.moves} move${state.moves === 1 ? "" : "s"}. This is the fast-success loop a portrait playable needs.`;
+    window.setTimeout(() => overlay.classList.remove("hidden"), 220);
+    return;
+  }
+
+  if (!state.solved) {
+    goalElement.textContent = "Power the vault";
     if (!state.tutorialDone) {
-      statusElement.textContent = "Rotate the highlighted tile to watch the whole board light up.";
+      statusElement.textContent = "Tap the highlighted tile for the instant win.";
     } else {
-      statusElement.textContent = `${energizedCount} tile${energizedCount === 1 ? "" : "s"} charged. Guide the flow into the vault.`;
+      const energizedCount = state.board.flat().filter((tile) => tile.energized).length;
+      statusElement.textContent = `${energizedCount} tiles charged. Keep the route flowing to the vault.`;
     }
   }
 }
@@ -251,21 +264,32 @@ function resetGame() {
   state = createGameState();
   overlay.classList.add("hidden");
   tutorialCallout.classList.remove("hidden");
-  goalElement.textContent = "Connect source to vault";
-  statusElement.textContent = "Rotate the highlighted tile to watch the whole board light up.";
+  statusElement.textContent = "One easy interaction, instant success, strong payoff.";
+  goalElement.textContent = "Power the vault";
   updateConnectivity();
   updateHud();
-  renderBoard();
+  paintBoard();
 }
+
+boardElement.addEventListener("click", (event) => {
+  const cell = event.target.closest(".cell");
+  if (!cell) {
+    return;
+  }
+
+  rotateTile(Number(cell.dataset.row), Number(cell.dataset.col));
+});
 
 replayButton.addEventListener("click", resetGame);
 
-ctaButtons.forEach((button) => {
+for (const button of ctaButtons) {
   button.addEventListener("click", () => {
     window.open(adTargetUrl, "_blank", "noopener,noreferrer");
   });
-});
+}
 
+state = createGameState();
+buildBoard();
 updateConnectivity();
 updateHud();
-renderBoard();
+paintBoard();
