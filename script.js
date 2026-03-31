@@ -131,6 +131,7 @@ function renderBoard() {
 
       const path = document.createElement("div");
       path.className = "cell-path";
+      cell.appendChild(path);
 
       const openSides = getOpenSides(tile);
       const horizontal = document.createElement("div");
@@ -166,7 +167,7 @@ function renderBoard() {
         cell.appendChild(label);
       }
 
-      cell.append(path, core);
+      cell.appendChild(core);
       fragment.appendChild(cell);
     });
   });
